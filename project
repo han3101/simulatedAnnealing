@@ -1,0 +1,112 @@
+"""
+Simulated Annealing Class
+"""
+import random
+import math
+
+class SimulatedAnnealing:
+    def __init__(self, initialSolution, solutionEvaluator, initialTemp, finalTemp, tempReduction, neighborOperator, iterationPerTemp=100, alpha=10, beta=5):
+        self.solution = initialSolution
+        self.evaluate = solutionEvaluator
+        self.currTemp = initialTemp
+        self.finalTemp = finalTemp
+        self.iterationPerTemp = iterationPerTemp
+        self.alpha = alpha
+        self.beta = beta
+        self.neighborOperator = neighborOperator
+
+        if tempReduction == "linear":
+            self.decrementRule = self.linearTempReduction
+        elif tempReduction == "geometric":
+            self.decrementRule = self.geometricTempReduction
+        elif tempReduction == "slowDecrease":
+            self.decrementRule = self.slowDecreaseTempReduction
+        else:
+            self.decrementRule = tempReduction
+
+    def linearTempReduction(self):
+        self.currTemp -= self.alpha
+
+    def geometricTempReduction(self):
+        self.currTemp *= self.alpha
+
+    def slowDecreaseTempReduction(self):
+        self.currTemp = self.currTemp / (1 + self.beta * self.currTemp)
+
+    def isTerminationCriteriaMet(self):
+        # can add more termination criteria
+        return self.currTemp <= self.finalTemp or self.neighborOperator(self.solution) == 0
+
+    def run(self):
+        while not self.isTerminationCriteriaMet():
+            # iterate that number of times
+            for i in range(self.iterationPerTemp):
+                # neighbouroperator should select a random neighbour and return new cost
+                neighbors = self.neighborOperator(self.solution)
+                # get the cost between the two solutions
+                cost = self.evaluate(self.solution) - neighbors
+                # if the new solution is better, accept it
+                if cost >= 0:
+                  	###update solution with the neighbour
+                # if the new solution is not better, accept it with a probability of e^(-cost/temp)
+                else:
+                    if random.uniform(0, 1) < math.exp(-cost / self.currTemp):
+                        ###update solution with the neighbour
+            # decrement the temperature
+            self.decrementRule()
+
+            
+# SCORE FUNCTION GIVEN TO US
+def score(G: nx.Graph, separated=False):
+    output = [G.nodes[v]['team'] for v in range(G.number_of_nodes())]
+    teams, counts = np.unique(output, return_counts=True)
+
+    k = np.max(teams)
+    b = np.linalg.norm((counts / G.number_of_nodes()) - 1 / k, 2)
+    C_w = sum(d for u, v, d in G.edges(data='weight') if output[u] == output[v])
+
+    if separated:
+        return C_w, K_COEFFICIENT * math.exp(K_EXP * k), math.exp(B_EXP * b)
+    return C_w + K_COEFFICIENT * math.exp(K_EXP * k) + math.exp(B_EXP * b)
+  
+def generateInitial(G: nx.Graph):
+  n = G.number_of_nodes()
+  mid = n // 2
+  for i in range(mid):
+    G.nodes[i]['team'] = 1
+	for i in range(mid, n):
+    G.nodes[i]['team'] = 2
+
+def generateInitial(G: nx.Graph, k):
+  n = G.number_of_nodes()
+  start = 0
+  end = n // k
+  incr = n // k
+  currTeam = 1
+  while start < n:
+    for i in range(start, min(end, n)):
+      G.nodes[i]['team'] = currTeam
+  	currTeam += 1
+    start, end = start + incr, end + incr
+    
+def generateInitialRandom(G: nx.Graph, k):
+  seed(1)
+  n = G.number_of_nodes()
+  for i in range(n):
+    G.nodes[i]['team'] = random.randint(1, k)
+    
+def findRandomNeighbour(G: nx.Graph):
+  seed(1)
+  n = G.number_of_nodes()
+  vertexA, vertexB = random.randint(0, n-1), random.randint(0, n-1)
+  if G.nodes[vertexA]['team'] != G.nodes[vertexB]['team']:
+    # compute new cost
+  	# return new cost
+    
+  
+  
+
+
+    
+    
+    
